@@ -174,11 +174,9 @@ def convert_excel(order_df, bom_df):
             '_ERROR': is_missing
         })
 
-    df = pd.DataFrame(rows)
-    return df
+    return pd.DataFrame(rows)
 
-
-st.title("이카운트 → 이플렉스 양식 변환기 (Streamlit)")
+st.title("이카운트 → 이플렉스 양식 변환기 (Styled Streamlit)")
 
 ecount_file = st.file_uploader("① 이카운트 주문양식 업로드", type=["xlsx"])
 bom_file = st.file_uploader("② BOM 등록 리스트 업로드", type=["csv"])
@@ -193,12 +191,20 @@ if ecount_file and bom_file:
         st.success("변환 완료! 결과를 아래에서 확인하거나 다운로드하세요.")
         st.dataframe(df_show)
 
-        from io import BytesIO
-        import base64
-        output = BytesIO()
-        df_show.to_excel(output, index=False)
-        output.seek(0)
+        # 파일 저장 + 스타일 적용
+        temp_file = "temp_styled_output.xlsx"
+        df_show.to_excel(temp_file, index=False)
+        wb = load_workbook(temp_file)
+        ws = wb.active
+        red_fill = PatternFill(start_color="FFFF0000", end_color="FFFF0000", fill_type="solid")
 
-        b64 = base64.b64encode(output.read()).decode()
-        href = f'<a href="data:application/octet-stream;base64,{b64}" download="이플렉스_변환결과.xlsx">📥 변환 결과 다운로드</a>'
-        st.markdown(href, unsafe_allow_html=True)
+        for i, err in enumerate(df['_ERROR'], start=2):
+            if err:
+                for j in range(1, ws.max_column + 1):
+                    ws.cell(row=i, column=j).fill = red_fill
+
+        styled_file = "styled_output.xlsx"
+        wb.save(styled_file)
+
+        with open(styled_file, "rb") as f:
+            st.download_button("📥 변환 결과 다운로드", f, file_name="이플렉스_변환결과.xlsx")
