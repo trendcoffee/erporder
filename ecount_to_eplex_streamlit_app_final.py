@@ -101,7 +101,7 @@ lotteon_map = {
 
 def convert_excel(order_df, bom_df):
     today = datetime.today().strftime('%Y-%m-%d')
-    order_df = pd.read_excel(ecount_path, skiprows=1, dtype=str).iloc[:-1]
+    order_df = pd.read_excel(ecount_file, skiprows=1, dtype=str).iloc[:-1]
     elevenst_clean = {k.replace(' ', ''): v for k, v in elevenst_map.items()}
     lotteon_clean = {k.replace(' ', ''): v for k, v in lotteon_map.items()}
     rows = []
@@ -182,11 +182,10 @@ ecount_file = st.file_uploader("① 이카운트 주문양식 업로드", type=[
 bom_file = st.file_uploader("② BOM 등록 리스트 업로드", type=["csv"])
 
 if ecount_file and bom_file:
-    order_df = pd.read_excel(ecount_file, skiprows=1)
     bom_df = pd.read_csv(bom_file)
 
     if st.button("변환 실행"):
-        df = convert_excel(order_df, bom_df)
+        df = convert_excel(ecount_file, bom_df)
         df_show = df.drop(columns=['_ERROR'])
         st.success("변환 완료! 결과를 아래에서 확인하거나 다운로드하세요.")
         st.dataframe(df_show)
