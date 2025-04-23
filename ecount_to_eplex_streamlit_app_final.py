@@ -101,17 +101,17 @@ lotteon_map = {
 
 def convert_excel(order_df, bom_df):
     today = datetime.today().strftime('%Y-%m-%d')
-    order_df = order_df.iloc[:-1]
+    order_df = pd.read_excel(ecount_path, skiprows=1, dtype=str).iloc[:-1]
     elevenst_clean = {k.replace(' ', ''): v for k, v in elevenst_map.items()}
     lotteon_clean = {k.replace(' ', ''): v for k, v in lotteon_map.items()}
     rows = []
 
     for _, row in order_df.iterrows():
-        try:
-            주문번호 = str(int(float(row.get('주문번호', ''))))
-            묶음주문번호 = str(int(float(row.get('묶음주문번호', ''))))
-        except:
-            주문번호, 묶음주문번호 = '', ''
+        주문번호_raw = row.get('주문번호', '')
+        묶음주문번호_raw = row.get('묶음주문번호', '')
+
+        주문번호 = 주문번호_raw.split('.')[0] if pd.notna(주문번호_raw) else ''
+        묶음주문번호 = 묶음주문번호_raw.split('.')[0] if pd.notna(묶음주문번호_raw) else ''
 
         우편번호 = str(row.get('우편번호', '')).split('.')[0].zfill(5)
         수집처 = str(row['수집처']).strip()
@@ -161,7 +161,7 @@ def convert_excel(order_df, bom_df):
             '배송메세지': row['배송요청사항'],
             '* 주문일자': today,
             '상품주문번호': '',
-            '주문번호(참조)': 묶음주문번호,
+            '주문번호(참조)': '',
             '박스구분': '',
             '상세배송유형': '',
             '새벽배송 SMS 전송': '',
