@@ -130,7 +130,7 @@ def convert_excel(order_df, bom_df):
             if 옵션 and 옵션 in lotteon_clean:
                 code = lotteon_clean[옵션]
             elif key.startswith('LO'):
-                code = key.split('/')[0]
+                code = str(row.get('쇼핑몰상품코드', '')).strip()
             else:
                 code = erp
         else:
